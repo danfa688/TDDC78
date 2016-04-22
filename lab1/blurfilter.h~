@@ -1,0 +1,39 @@
+/*
+  File: blurfilter.h
+
+  Declaration of pixel structure and blurfilter function.
+    
+ */
+
+#ifndef _BLURFILTER_H_
+#define _BLURFILTER_H_
+
+#include <mpi.h>
+
+/* NOTE: This structure must not be padded! */
+typedef struct _pixel {
+    unsigned char r,g,b;
+} pixel;
+
+pixel item;
+
+MPI_Datatype pixel_mpi;
+int block_lengths [] = {1 , 1, 1};
+MPI_Datatype block_types [] = {MPI_CHAR, MPI_CHAR, MPI_CHAR};
+MPI_Aint start, displ[3];
+
+MPI_Address(&item, &start);
+MPI_Address(&item.r, &displ[0]);
+MPI_Address(&item.g, &displ[1]);
+MPI_Address(&item.b, &displ[2]);
+
+displ[0] -= start;
+displ[1] -= start;
+displ[2] -= start;
+MPI_Type_struct(3, block_lengths, displ, block_types, &pixel_mpi);
+
+MPI_Type_commit( &pixel_mpi);
+
+void blurfilter(const int xsize, const int ysize, pixel* src, const int radius, const double *w);
+
+#endif
