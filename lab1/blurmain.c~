@@ -44,7 +44,7 @@ int main (int argc, char *argv[]) {
 
 	MPI_Datatype pixel_mpi;
 	int block_lengths [] = {1 , 1, 1};
-	MPI_Datatype block_types [] = {MPI_CHAR, MPI_CHAR, MPI_CHAR};
+	MPI_Datatype block_types [] = {MPI_UNSIGNED_CHAR,MPI_UNSIGNED_CHAR,MPI_UNSIGNED_CHAR};
 	MPI_Aint start, displ[3];
 
 	MPI_Address(&item, &start);
@@ -96,7 +96,7 @@ int main (int argc, char *argv[]) {
     get_gauss_weights(radius, w);  //Only needs to be calculated once
 
 	if (me == 0) {
-		printf("Calling filter %d\n", me);
+		printf("Calling filter\n");
 
 		clock_gettime(CLOCK_REALTIME, &stime);
 	}
@@ -128,9 +128,10 @@ int main (int argc, char *argv[]) {
 		memcpy(local_src, src, ldata[me][1]*xsize*3);	//Copy from src to local src in process 0
 	}else{
 		MPI_Recv(local_src, ldata[me][1]*xsize, pixel_mpi, 0, 10, com, &status);
+		//printf( "From P%d, tag %d\n", status.MPI_SOURCE, status.MPI_TAG );
 	}
-	
-    //blurfilter(xsize, ysize, src, radius, w);
+	int ydiff = lproblem[me][0] - ldata[me][0];
+    blurfilter(xsize, ysize, local_src, radius, w, ydiff, lproblem[me][1], ldata[me][1]);
     
 	//Get data from other processes
 	//MPI_Gather
@@ -149,7 +150,7 @@ int main (int argc, char *argv[]) {
     	printf("Writing output file\n");
     }
     
-    if(me ==1){
+    if(me ==3){
     	if(write_ppm (argv[3], xsize, ldata[me][1], (char *)local_src) != 0){
       		exit(1);
       	}
