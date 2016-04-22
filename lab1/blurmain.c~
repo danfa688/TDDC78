@@ -38,7 +38,6 @@ int main (int argc, char *argv[]) {
 		src = malloc(MAX_PIXELS*sizeof(*src));
     }
 
-    
     //Create mpi structure
     pixel item;
 
@@ -91,9 +90,7 @@ int main (int argc, char *argv[]) {
 		buff[2]=radius;
 
     }
-
     /* filter */
-    get_gauss_weights(radius, w);  //Only needs to be calculated once
 
 	if (me == 0) {
 		printf("Calling filter\n");
@@ -110,7 +107,8 @@ int main (int argc, char *argv[]) {
 		ysize=buff[1];
 		radius=buff[2];
 	}
-	
+	get_gauss_weights(radius, w);  //Theoretically only needs to be calculated once
+    								//and then sent to other processes
 	//Calculates lproblem, size and lines
 	calculate_local_problem_size(xsize,ysize,radius,np ,me , lproblem);
 	//Calculates ldata from lproblem, ldata contains size and lines of the problem and radius
@@ -128,15 +126,14 @@ int main (int argc, char *argv[]) {
 		memcpy(local_src, src, ldata[me][1]*xsize*3);	//Copy from src to local src in process 0
 	}else{
 		MPI_Recv(local_src, ldata[me][1]*xsize, pixel_mpi, 0, 10, com, &status);
-		//printf( "From P%d, tag %d\n", status.MPI_SOURCE, status.MPI_TAG );
+		//printf( "From P%d, error %d\n", status.MPI_SOURCE, status.MPI_ERROR );
 	}
 	int ydiff = lproblem[me][0] - ldata[me][0];
     blurfilter(xsize, ysize, local_src, radius, w, ydiff, lproblem[me][1], ldata[me][1]);
     
 	//Get data from other processes
-	//MPI_Gather
-
-
+	MPI_Gather(&local_src[ydiff*xsize], lproblem[me][1]*xsize, pixel_mpi, src, lproblem[me][1]*xsize, pixel_mpi, 0, com);
+	   
 	if(me == 0)
 	{
     	clock_gettime(CLOCK_REALTIME, &etime);
@@ -150,22 +147,11 @@ int main (int argc, char *argv[]) {
     	printf("Writing output file\n");
     }
     
-    if(me ==3){
-    	if(write_ppm (argv[3], xsize, ldata[me][1], (char *)local_src) != 0){
+    if(me ==1){
+    	if(write_ppm (argv[3], xsize, ldata[me][1], (unsigned char *)local_src) != 0){
       		exit(1);
       	}
     }
-    
-	if(me == 0){
-		printf("lproblem:\n");
-		for(i=0; i<np; i++){
-			printf("[%d][%d]\n",lproblem[i][0],lproblem[i][1]);
-		}
-		printf("ldata:\n");
-		for(i=0; i<np; i++){
-			printf("[%d][%d]\n",ldata[i][0],ldata[i][1]);
-		}
-	}
 	MPI_Finalize();
 }
 

@@ -41,7 +41,6 @@ int read_ppm (const char * fname,
     return 4;
  };
 
-fprintf(stderr,"Before fread \n");
 
   if (strncmp(ftype, ctype, 2) == 0) {
     if (fread (data, sizeof (char), *xpix * *ypix * 3, fp) != 
@@ -52,8 +51,6 @@ fprintf(stderr,"Before fread \n");
   } else {
     fprintf (stderr, "Wrong file format: %s\n", ftype);
   }
-
-fprintf(stderr,"After fread \n");
 
   if (fclose (fp) == EOF) {
     perror ("Close failed");

@@ -77,7 +77,7 @@ int write_ppm (const char * fname, int xpix, int ypix, char * data) {
   
   fprintf (fp, "P6\n");
   fprintf (fp, "%d %d 255\n", xpix, ypix);
-  if (fwrite (data, sizeof (char), xpix*ypix*3, fp) != xpix*ypix*3) {
+  if (fwrite (data, sizeof (unsigned char), xpix*ypix*3, fp) != xpix*ypix*3) {
     perror ("Write failed");
     return 2;
   }
