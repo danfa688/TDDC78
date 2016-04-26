@@ -1,8 +1,8 @@
 CC=mpicc
 
-CFLAGS = 
+CFLAGS = -Nmpi
 
-LFLAGS= -lpthread -lrt -lm
+LFLAGS= -lpthread -lrt -lm -Nmpi
 
 all: blurc thresc
 

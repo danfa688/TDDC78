@@ -2,7 +2,7 @@ CC=mpicc
 
 CFLAGS = -Nmpi
 
-LFLAGS= -lpthread -lrt -lm -Nmpi
+LFLAGS= -Nmpi -lpthread -lrt -lm
 
 all: blurc thresc
 
