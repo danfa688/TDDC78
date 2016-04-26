@@ -10,9 +10,9 @@
 #include <stdlib.h>
 
 
-void calculate_local_problem_size(const int x,const int y,const int np, const int me, int lproblem[][2]);
+void calculate_local_problem_size(const int x,const int y,const int np, int lproblem[][2]);
 
-void calculate_local_allocation_size(int ldata[][2], int lproblem[][2],int const ysize ,const int me, const int np, const int radius);
+void calculate_local_allocation_size(int ldata[][2], int lproblem[][2],int const ysize, const int np, const int radius);
 
 int write_txt (const char* fname, const int radius, const double time, const int np);
 
@@ -80,7 +80,7 @@ int main (int argc, char *argv[]) {
 			filename = "im4blur.txt";
 			break;
     	}
-		for(counter = 0; counter < 2; counter ++)
+		for(counter = 0; counter < 10; counter ++)
 		{
 			radius= pow(2,counter);
 			if (me == 0) { // read image at process 0:
@@ -120,7 +120,7 @@ int main (int argc, char *argv[]) {
 				radius=buff[2];
 			}
 			get_gauss_weights(radius, w);  //Theoretically only needs to be calculated once
-											//and then sent to other processes
+							//and then sent to other processes
 			//Calculates lproblem, size and lines
 			calculate_local_problem_size(xsize,ysize,np ,me , lproblem);
 			//Calculates ldata from lproblem, ldata contains size and lines of the problem and radius
@@ -163,7 +163,7 @@ int main (int argc, char *argv[]) {
 }
 
 
-void calculate_local_problem_size(const int x,const int y,const int np, const int me, int lproblem[][2]){
+void calculate_local_problem_size(const int x,const int y,const int np, int lproblem[][2]){
 	int linesize, rest;
 	int lysize[np];
 	linesize = floor(y/np);
@@ -189,7 +189,7 @@ void calculate_local_problem_size(const int x,const int y,const int np, const in
 	}
 }
 
-void calculate_local_allocation_size(int ldata[][2], int lproblem[][2],int const ysize ,const int me, const int np, const int radius){
+void calculate_local_allocation_size(int ldata[][2], int lproblem[][2],int const ysize , const int np, const int radius){
 	int i;
 	for(i=0; i<np; i++){
 		if(lproblem[i][0] > radius){
